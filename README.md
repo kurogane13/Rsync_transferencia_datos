@@ -22,7 +22,6 @@ Herramientas necesarias para uso del programa:
 
 - Endpoint alcanzable a nivel de red (hostname debe resolver DNS/ o ip alcanzable)
 - opensshserver debe estar instalado en ambos endpoints (local y remoto)
-- sshpass debe estar instalado en el servidor local
 - Hostkey agregada y con acceso previo via ssh manual. Se debe haber tenido acceso via ssh al endpoint anteriormente con usuario y contraseña.
 
 Ejecucion del programa:
