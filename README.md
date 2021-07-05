@@ -10,6 +10,7 @@ Proposito del programa: Poder transferir grandes volumenes de datos hacia servid
 
 Funcionalidad del programa:
 
+- Consulta de datos y puntos de montaje
 - Transferencia de datos con exclusion de carpetas/archivos.
 - Transferencia total de directorios sin ninguna exclusion.
 - Mientras que el menu interactivo este activo (programa corriendo), pueden re-configurarse variables o parametros en caso de equivocaciones o correcciones necesarias, antes de iniciar transferencia de datos.
@@ -27,7 +28,7 @@ Ejecucion del programa:
 
 - Crear una carpeta para el programa y colocar el shellscript (rsync_transfer_data.sh) dentro de ella. 
 - Abrir una terminal en linux y correr: bash /carpeta_programa/rsync_transfer_data.sh
-- NOTA: el programa creara archivos de logs, y carpetas.log ( este ultimo crea contendra datos que el usuario agrege, que seran excluidos de correrse el modo transferencia con exclusion de datos)
+- NOTA: el programa creara archivos de logs, y carpetas.log ( este ultimo contendra datos que el usuario agrege, que seran excluidos de correrse el modo transferencia con exclusion de datos)
 
 Modo de uso del programa: 
 
