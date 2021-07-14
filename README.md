@@ -11,7 +11,7 @@ Proposito del programa: Poder transferir grandes volumenes de datos hacia servid
 Funcionalidad del programa:
 
 - Consulta de datos y puntos de montaje de servidor local y remotos.
-- Creacion de scripts persistidos de transferencia de datos.
+- Creacion, edicion y eliminacion de scripts persistidos de transferencia de datos hacia puntos de montajes, directorios, o servidores/hosts remotos, y archivos de exclusion de datos (archivos que contienen datos de carpetas y archivos a excluir en la sincronizacion de rsync).
 - Transferencia de datos con exclusion de carpetas/archivos.
 - Transferencia total de datos sin ninguna exclusion.
 - Mientras que el menu interactivo este activo (programa corriendo), pueden re-configurarse variables o parametros en caso de equivocaciones o correcciones necesarias, antes de iniciar transferencia de datos.
