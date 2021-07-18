@@ -15,6 +15,7 @@ Funcionalidad del programa:
 - Transferencia de datos con exclusion de carpetas/archivos.
 - Transferencia total de datos sin ninguna exclusion.
 - Mientras que el menu interactivo este activo (programa corriendo), pueden re-configurarse variables o parametros en caso de equivocaciones o correcciones necesarias, antes de iniciar transferencia de datos.
+- Logs de script customizados. 
 - Logs completos de eventos (Transferencias via rsync)
 - Logs de sistema (aplicacion propia). Variables no seteadas, errores. 
 
