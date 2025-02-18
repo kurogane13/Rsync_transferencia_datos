@@ -120,7 +120,7 @@ do
      echo "----------------------------------------------------------------------------------"
 	 fi
 	   if [ -z ${puerto+x} ]; then
-     echo "$(date) ERROR-PUERTO - ATENCION: La variable pueto aun no fue proveida, ingrese al menu puerto y el puerto de conexion del servidor para poder operar" | tee -a syslog.log
+     echo "$(date) ERROR-PUERTO - ATENCION: La variable puerto aun no fue proveida, ingrese al menu puerto y el puerto de conexion del servidor para poder operar" | tee -a syslog.log
      echo "----------------------------------------------------------------------------------"
 	 echo "$(date) NOTIFICACION - MENSAJE: Volviendo a menu principal"  | tee -a syslog.log
 	 echo " "
