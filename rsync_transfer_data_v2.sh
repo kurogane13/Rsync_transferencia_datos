@@ -35,7 +35,7 @@ mkdir -p /home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts
 mkdir -p /home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts/rsync/
 mkdir -p /home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts/rsync/scripts_conexiones_exclusion_datos
 mkdir -p /home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts/rsync/custom_scripts_logs
-cp rsync_transfer_data.sh /home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts/rsync/ &>/dev/null
+cp rsync_transfer_data_v2.sh /home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts/rsync/ &>/dev/null
 path_programa="/home/$USER/Desktop/myfiles/Tecnologia/Ubuntu/My_Bash_scripts/rsync/"
 cd $path_programa
 while true; 
@@ -46,7 +46,7 @@ echo " "
 echo "   Menu principal - Seleccione una opcion para operar "
 echo "######################################################"
 echo " "
-opciones=("- Ver tamaño de montajes en host local" "- Ver tamaño de montajes en host remoto" "- Ver scripts" "- Ver archivos de exclusion de datos" "- Editar scripts" "- Editar archivos de exclusion de datos" "- Eliminar scripts" "- Eliminar archivos de exclusion de datos" "- Ejecutar scripts" "+ Crear nuevo script de transferencia hacia Servidor Remoto" "+ Crear nuevo script local de transferencia hacia directorio/disco " "- Verificar variables seteadas y errores" "- Nombre/ip de servidor" "- Usuario" "- Contraseña" "- Path de origen" "- Path de destino" "- Excluir carpeta/s y/o archivos" "- Regenerar archivo carpetas.log" "- Ejecutar programa excluyendo carpetas y archivos" "- Iniciar programa sin excluir una carpeta ni archivo" "- Ver log de transferencias rsync_log" "- Ver log de eventos syslog.log" "- Ver logs de scripts ejecutados" "- Eliminar logs de scripts ejecutados")
+opciones=("- Ver tamaño de montajes en host local" "- Ver tamaño de montajes en host remoto" "- Ver scripts" "- Ver archivos de exclusion de datos" "- Editar scripts" "- Editar archivos de exclusion de datos" "- Eliminar scripts" "- Eliminar archivos de exclusion de datos" "- Ejecutar scripts" "+ Crear nuevo script de transferencia hacia Servidor Remoto" "+ Crear nuevo script local de transferencia hacia directorio/disco " "- Verificar variables seteadas y errores" "- Nombre/ip de servidor" "- Puerto de conexion del servidor" "- Usuario" "- Contraseña" "- Path de origen" "- Path de destino" "- Excluir carpeta/s y/o archivos" "- Regenerar archivo carpetas.log" "- Ejecutar programa excluyendo carpetas y archivos" "- Iniciar programa sin excluir una carpeta ni archivo" "- Ver log de transferencias rsync_log" "- Ver log de eventos syslog.log" "- Ver logs de scripts ejecutados" "- Eliminar logs de scripts ejecutados")
 select opcion in "${opciones[@]}"
 do
   case $opcion in
@@ -119,6 +119,16 @@ do
      echo "$(date) OK-03 - variable password seteada - La password ya fue definida. Si desea cambiarla ingrese al menu Contraseña" | tee -a syslog.log
      echo "----------------------------------------------------------------------------------"
 	 fi
+	   if [ -z ${puerto+x} ]; then
+     echo "$(date) ERROR-PUERTO - ATENCION: La variable pueto aun no fue proveida, ingrese al menu puerto y el puerto de conexion del servidor para poder operar" | tee -a syslog.log
+     echo "----------------------------------------------------------------------------------"
+	 echo "$(date) NOTIFICACION - MENSAJE: Volviendo a menu principal"  | tee -a syslog.log
+	 echo " "
+     break
+     else
+     echo "$(date) OK-PUERTO-SETEADO - variable puerto seteada - Si desea cambiarlo ingrese al menu puerto de conexion" | tee -a syslog.log
+     echo "----------------------------------------------------------------------------------"
+	 fi
      echo " "
      echo "$(date) NOTIFICACION - MENSAJE: No se han encontrado errores" | tee -a syslog.log
      echo " "
@@ -126,13 +136,13 @@ do
      echo " "
      echo "$(date) NOTIFICACION - MENSAJE: Mostrando tamaño en montajes en $servidor: " | tee -a server-remoto.log
      echo " "
-     sshpass -p "$clave" ssh $usuario@$servidor df -h | grep /dev/ | tee -a server-remoto.log
+     sshpass -p "$clave" ssh $usuario@$servidor -p$puerto df -h | grep /dev/ | tee -a server-remoto.log
      echo " "
      echo "$(date) Mostrando direccion Ip:" | tee -a server-remoto.log
-     sshpass -p "$clave" ssh $usuario@$servidor ifconfig | grep cast | tee -a server-remoto.log
+     sshpass -p "$clave" ssh $usuario@$servidor -p$puerto ifconfig | grep cast | tee -a server-remoto.log
      echo " "
      echo "$(date) NOTIFICACION - MENSAJE: Mostrando Distribucion Linux: " | tee -a server-remoto.log
-     sshpass -p "$clave" ssh $usuario@$servidor cat /etc/os-release | tee -a server-remoto.log
+     sshpass -p "$clave" ssh $usuario@$servidor -p$puerto cat /etc/os-release | tee -a server-remoto.log
      echo "----------------------------------------------------------------------------------" >> server-remoto.log
      echo " "
      echo "$(date) NOTIFICACION - MENSAJE: Se realizo conulta de tamaño de puntos de montaje en server: $servidor" | tee -a syslog.log server-remoto.log
@@ -621,7 +631,7 @@ do
      echo " "
      echo "Verificando acceso y respuesta del servidor: $servidor... "
      echo " "
-     if ! sshpass -p ${clave} ssh ${usuario}@${servidor} uptime 2>&1; then
+     if ! sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uptime 2>&1; then
      echo " "
      echo "No se ha podido establecer el acceso al servidor $servidor con los parametros obtenidos. Verifique la conexion y el acceso al mismo, y reingrese al menu para crear el script." | tee -a syslog.log
      echo " "
@@ -636,31 +646,31 @@ do
      echo " "
      echo "Nombre: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} hostname
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} hostname
      echo " "
      echo "Uptime: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} uptime
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uptime
      echo " "
      echo "Direccion IP: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} hostname -i
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} hostname -i
      echo " "
      echo "Sistema operativo y distribucion: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} cat /etc/os-release
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} cat /etc/os-release
      echo " "
      echo "Kernel: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} uname -a
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uname -a
      echo " "
      echo "Puntos de montaje en /dev/sd: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} df -h -t ext4 -t xfs
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} df -h | grep /dev/sd
      echo " "
      echo "Memoria utilizada y disponible: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} free -h
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} free -h
      echo " "
      fi
      echo " "
@@ -686,7 +696,7 @@ do
      read -p "Path destino (host remoto): " pathdestino
      echo " "
 	 echo "Verificando la existencia de la ruta $pathdestino en el servidor $servidor..."
-	 if ! sshpass -p ${clave} ssh ${usuario}@${servidor} ls $pathdestino >/dev/null 2>&1; then
+	 if ! sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} ls $pathdestino >/dev/null 2>&1; then
 	 echo " "
 	 echo "$(date) NOTIFICACION - MENSAJE: El path de destino proporcionado es invalido, o inexistente. Verifique que el mismo exista, y reingrese en el menu para proveerlo" | tee -a syslog.log
 	 echo " "
@@ -748,7 +758,7 @@ do
 	 echo " "
      echo "Las carpetas y/o archivos excluidos se encuentran guardadas en la carpeta: $archivo$archivo_carpetas_exclusion"
      echo " "
-     echo 'sshpass -p "$clave" rsync -auv  --ignore-missing-args --stats --update --progress --out-format="%t %f" $pathorigen --exclude-from=$mypwd$scripts_conexiones_exclusion_datos$archivo$archivo_carpetas_exclusion ssh $usuario@$servidor:$pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log' >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
+     echo 'sshpass -p "$clave" rsync -auv  --ignore-missing-args --stats --update --progress --out-format="%t %f" $pathorigen --exclude-from=$mypwd$scripts_conexiones_exclusion_datos$archivo$archivo_carpetas_exclusion ssh $usuario@$servidor -p$puerto:$pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log' >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      
 	 echo "echo '----------------------------------------------------------------------------------------' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
@@ -758,10 +768,10 @@ do
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo 'Listando carpetas en el servidor $servidor para la ruta $pathdestino: ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
-     listar_path_destino="sshpass -p '$clave' ssh $usuario@$servidor ls -lha $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
+     listar_path_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto ls -lha $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
      echo $listar_path_destino  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
-     total_carpetas_path_destino="sshpass -p '$clave' ssh $usuario@$servidor du -h -c --time $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
+     total_carpetas_path_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto du -h -c --time $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
      echo $total_carpetas_path_destino  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo 'El informe visto arriba, muestra el tamaño total de carpetas, fecha ultima modificacion, y ruta de cada carpeta' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
@@ -772,9 +782,9 @@ do
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
 
      total_de_carpetas_origen="ls -lha $pathorigen | wc -l | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
-     total_de_carpetas_destino="sshpass -p '$clave' ssh $usuario@$servidor ls -lha $pathdestino | wc -l | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
+     total_de_carpetas_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto ls -lha $pathdestino | wc -l | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
      size_total_origen="du -sh $pathorigen | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
-     size_total_destino="sshpass -p '$clave' ssh $usuario@$servidor du -sh $pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
+     size_total_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto du -sh $pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo 'Tamaño total de la carpeta del path de Origen: $pathorigen' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
      echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo$archivo_exclusion_datos
@@ -825,7 +835,7 @@ do
      echo " " >> scripts_conexiones_exclusion_datos/$archivo.sh
      echo "# Instancia de conexion de script "$archivo.sh >> scripts_conexiones_exclusion_datos/$archivo.sh
      echo " " >> scripts_conexiones_exclusion_datos/$archivo.sh
-     echo 'sshpass -p "$clave" rsync -auv  --stats --update --progress --out-format="%t %f" $pathorigen  ssh $usuario@$servidor:$pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log' >> scripts_conexiones_exclusion_datos/$archivo.sh
+     echo 'sshpass -p "$clave" rsync -auv  --stats --update --progress --out-format="%t %f" $pathorigen  ssh $usuario@$servidor -p$puerto:$pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log' >> scripts_conexiones_exclusion_datos/$archivo.sh
      echo " "
 	 
 	 echo "echo '----------------------------------------------------------------------------------------' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
@@ -836,10 +846,10 @@ do
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo 'Listando carpetas en el servidor $servidor para la ruta $pathdestino: ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
-	 listar_path_destino="sshpass -p '$clave' ssh $usuario@$servidor ls -lha $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
+	 listar_path_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto ls -lha $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
 	 echo $listar_path_destino  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
-	 total_carpetas_path_destino="sshpass -p '$clave' ssh $usuario@$servidor du -h -c --time $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
+	 total_carpetas_path_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto du -h -c --time $pathdedestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
 	 echo $total_carpetas_path_destino  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo 'El informe visto arriba, muestra el tamaño total de carpetas, fecha ultima modificacion, y ruta de cada carpeta' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
@@ -850,9 +860,9 @@ do
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
 
 	 total_de_carpetas_origen="ls -lha $pathorigen | wc -l | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
-	 total_de_carpetas_destino="sshpass -p '$clave' ssh $usuario@$servidor ls -lha $pathdestino | wc -l | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
+	 total_de_carpetas_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto ls -lha $pathdestino | wc -l | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
 	 size_total_origen="du -sh $pathorigen | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
-	 size_total_destino="sshpass -p '$clave' ssh $usuario@$servidor du -sh $pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
+	 size_total_destino="sshpass -p '$clave' ssh $usuario@$servidor -p$puerto du -sh $pathdestino | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo 'Tamaño total de la carpeta del path de Origen: $pathorigen' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
 	 echo "echo ' ' | tee -a $mypwd$custom_scripts_logs/$archivo$sin_exclusion_de_datos_log"  >> scripts_conexiones_exclusion_datos/$archivo.sh
@@ -1174,7 +1184,14 @@ do
 	 else
      echo "$(date) OK-05 - variable pathdestino seteada - La ruta de destino es: $pathdestino. Si desea cambiarla ingrese al menu path de destino" | tee -a syslog.log
      echo "----------------------------------------------------------------------------------"
-	 fi 
+	 fi
+	  if [ -z ${puerto+x} ]; then
+     echo "$(date) ERROR-Puerto - ATENCION: La variable puerto del servidor aun no fue proveida, ingrese al menu Puerto del servidor para poder operar" | tee -a syslog.log
+     echo "----------------------------------------------------------------------------------"
+	 else
+     echo "$(date) OK-05 - variable puerto del servidor seteada - El puerto seteado es: $puerto. Si desea cambiarlo ingrese al menu Puerto del servidor" | tee -a syslog.log
+     echo "----------------------------------------------------------------------------------"
+	 fi
      if [ -f "carpetas.log" ]; then
      echo "$(date) OK-06 - El archivo carpetas.log  ya esta creado"  | tee -a syslog.log
 	 echo " "
@@ -1219,6 +1236,45 @@ do
 	 if [[  $si_o_no == "n" ]] ;then
 	 echo " "
 	 echo "$(date) NOTIFICACION - MENSAJE: No se ha seteado la variable servidor" | tee -a syslog.log
+	 echo " "
+	 read -p "Presione enter para desplegar el menu... " enter
+	 break
+	 else
+	 echo " "
+	 echo "$(date) ERROR - No ha seleccionado una opcion valida" | tee -a syslog.log
+	 echo " "
+	 echo "$(date) NOTIFICACION - MENSAJE: Volviendo a menu principal..." | tee -a syslog.log
+	 echo " "
+	 read -p "Presione enter para desplegar el menu... " enter
+	 break
+	 fi
+     ;;
+
+  "- Puerto de conexion del servidor")
+   echo  " "
+ 	 echo "$(date) NOTIFICACION - MENSAJE: Ingresando a modo servidor..." | tee -a syslog.log
+	 if [ -z "$puerto" ]; then
+ 	 echo "$(date) NOTIFICACION - MENSAJE: La variable puerto de conexion del servidor no esta seteada" | tee -a syslog.log
+	 echo " "
+	 else
+	 echo "$(date) NOTIFICACION - MENSAJE: La variable puerto de conexion del servidor ya esta seteada como: $puerto" | tee -a syslog.log
+	 fi
+	 echo " "
+	 read -p "Desea configurar la variable puerto de conexion del servidor ahora?: s/n... " si_o_no
+	 if [[  $si_o_no == "s" ]] ;then
+ 	 echo " "
+	 read -p "Ingrese el numero de puerto del servidor remoto para conexion ... " puerto
+ 	 echo " "
+	 echo "$(date) NOTIFICACION - MENSAJE: Se ingreso un nuevo registro para la variable puerto del servidor" | tee -a syslog.log
+	 echo " "
+	 echo "$(date) NOTIFICACION - MENSAJE: La variable puerto del servidor esta seteada como: $puerto" | tee -a syslog.log
+	 echo " "
+	 read -p "Presione enter para desplegar el menu... " enter
+	 break
+	 fi
+	 if [[  $si_o_no == "n" ]] ;then
+	 echo " "
+	 echo "$(date) NOTIFICACION - MENSAJE: No se ha seteado la variable puerto del servidor" | tee -a syslog.log
 	 echo " "
 	 read -p "Presione enter para desplegar el menu... " enter
 	 break
@@ -1643,7 +1699,7 @@ do
 	 echo " "
      echo "Verificando acceso y respuesta del servidor: $servidor... "
      echo " "
-     if ! sshpass -p ${clave} ssh ${usuario}@${servidor} uptime 2>&1; then
+     if ! sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto}  uptime 2>&1; then
      echo " "
      echo "No se ha podido establecer el acceso al servidor $servidor con los parametros obtenidos. Verifique la conexion y el acceso al mismo, y reingrese al menu para crear el script." | tee -a syslog.log
      echo " "
@@ -1658,31 +1714,31 @@ do
      echo " "
      echo "Nombre: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} hostname
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} hostname
      echo " "
      echo "Uptime: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} uptime
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uptime
      echo " "
      echo "Direccion IP: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} hostname -i
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} hostname -i
      echo " "
      echo "Sistema operativo y distribucion: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} cat /etc/os-release
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} cat /etc/os-release
      echo " "
      echo "Kernel: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} uname -a
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uname -a
      echo " "
      echo "Puntos de montaje en /dev/sd: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} df -h -t ext4 -t xfs
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} df -h | grep /dev/sd
      echo " "
      echo "Memoria utilizada y disponible: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} free -h
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} free -h
      echo " "
      fi
 	 echo " " >> rsync_log.log
@@ -1695,18 +1751,18 @@ do
 	 if [[ $proceder_o_salir == "s" ]]; then
 	 echo "Iniciando transferencia de datos hacia $servidor..." >> rsync_log.log
 	 echo " " >> rsync_log.log
-	 sshpass -p "$clave" rsync -auv --ignore-missing-args --stats --update --progress --out-format="%t %f" $pathorigen --exclude-from='carpetas.log' ssh $usuario@$servidor:$pathdestino
+	 sshpass -p "$clave" rsync -auv --ignore-missing-args --stats --update --progress --out-format="%t %f" $pathorigen --exclude-from='carpetas.log' ssh $usuario@$servidor -p$puerto:$pathdestino
 	 echo " " >> rsync_log.log
 	 echo "Listando contenido de carpeta $pathdestino..." >> rsync_log.log
 	 echo " " >> rsync_log.log
-	 sshpass -p "$clave" ssh $usuario@$servidor ls -lha $pathdestino >> rsync_log.log
+	 sshpass -p "$clave" ssh $usuario@$servidor -p$puerto ls -lha $pathdestino >> rsync_log.log
 	 echo " " >> rsync_log.log
 	 echo "Cantidad de archivos en $pathdestino @$servidor: " >> rsync_log.log
 	 echo " " >> rsync_log.log
-	 sshpass -p "$clave" ssh $usuario@$servidor ls -lha $pathdestino | wc -l >> rsync_log.log
+	 sshpass -p "$clave" ssh $usuario@$servidor -p$puerto ls -lha $pathdestino | wc -l >> rsync_log.log
 	 echo " " >> rsync_log.log
 	 echo "Tamaño de las 10 ccarpetas mas grandes en $pathdestino @$servidor: " >> rsync_log.log
-	 sshpass -p "$clave" ssh $usuario@$servidor du -h $pathdestino | sort -hr | tail -n +1 | head -$1 >> rsync_log.log
+	 sshpass -p "$clave" ssh $usuario@$servidor -p$puerto du -h $pathdestino | sort -hr | tail -n +1 | head -$1 >> rsync_log.log
 	 echo " " >> rsync_log.log
 	 echo "------------------------------------------------" >> rsync_log.log
  	 echo " " >> rsync_log.log
@@ -1808,7 +1864,7 @@ do
      echo " "
      echo "Verificando acceso y respuesta del servidor: $servidor... "
      echo " "
-     if ! sshpass -p ${clave} ssh ${usuario}@${servidor} uptime 2>&1; then
+     if ! sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uptime 2>&1; then
      echo " "
      echo "No se ha podido establecer el acceso al servidor $servidor con los parametros obtenidos. Verifique la conexion y el acceso al mismo, y reingrese al menu para crear el script." | tee -a syslog.log
      echo " "
@@ -1823,31 +1879,31 @@ do
      echo " "
      echo "Nombre: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} hostname
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} hostname
      echo " "
      echo "Uptime: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} uptime
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uptime
      echo " "
      echo "Direccion IP: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} hostname -i
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} hostname -i
      echo " "
      echo "Sistema operativo y distribucion: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} cat /etc/os-release
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} cat /etc/os-release
      echo " "
      echo "Kernel: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} uname -a
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} uname -a
      echo " "
      echo "Puntos de montaje en /dev/sd: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} df -h -t ext4 -t xfs
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} df -h | grep /dev/sd
      echo " "
      echo "Memoria utilizada y disponible: "
      echo " "
-     sshpass -p ${clave} ssh ${usuario}@${servidor} free -h
+     sshpass -p ${clave} ssh ${usuario}@${servidor} -p ${puerto} free -h
      echo " "
      fi
 	 echo "Proceder con el programa y transferir los datos a $servidor?"
@@ -1856,18 +1912,18 @@ do
 	 echo " "
      echo "Iniciando transferencia de datos hacia $servidor..." >> rsync_log.log
      echo " " >> rsync_log.log
-     sshpass -p "$clave" rsync -auv --ignore-missing-args --stats --update --progress --out-format="%t %f" $pathorigen  ssh $usuario@$servidor:$pathdestino
+     sshpass -p "$clave" rsync -auv --ignore-missing-args --stats --update --progress --out-format="%t %f" $pathorigen  ssh $usuario@$servidor -p$puerto:$pathdestino
      echo " " >> rsync_log.log
      echo "Listando contenido de carpeta $pathdestino..." >> rsync_log.log
      echo " " >> rsync_log.log
-     sshpass -p "$clave" ssh $usuario@$servidor ls -lha $pathdestino >> rsync_log.log
+     sshpass -p "$clave" ssh $usuario@$servidor -p$puerto ls -lha $pathdestino >> rsync_log.log
      echo " " >> rsync_log.log
      echo "Cantidad de archivos en $pathdestino @$servidor: " >> rsync_log.log
      echo " " >> rsync_log.log
-     sshpass -p "$clave" ssh $usuario@$servidor ls -lha $pathdestino | wc -l >> rsync_log.log
+     sshpass -p "$clave" ssh $usuario@$servidor -p$puerto ls -lha $pathdestino | wc -l >> rsync_log.log
      echo " " >> rsync_log.log
      echo "Tamaño de las 10 ccarpetas mas grandes en $pathdestino @$servidor: " >> rsync_log.log
-     sshpass -p "$clave" ssh $usuario@$servidor du -h $pathdestino | sort -hr | tail -n +1 | head -$1 >> rsync_log.log
+     sshpass -p "$clave" ssh $usuario@$servidor -p$puerto du -h $pathdestino | sort -hr | tail -n +1 | head -$1 >> rsync_log.log
      echo " " >> rsync_log.log
      echo "------------------------------------------------" >> rsync_log.log
      echo " " >> rsync_log.log

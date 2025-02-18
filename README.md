@@ -4,6 +4,12 @@ PROGRAMA CREADO POR GUSTAVO WYDLER AZUAGA - 28/04/2021
 
 ---------------------------------------------------------------------------------------------------------------------------------------
 
+NUEVA VERSION 2 - 18/02/2025
+
+- Se agrego la validacion del parametro puerto en varias instancias operativas.
+
+---------------------------------------------------------------------------------------------------------------------------------------
+
 Programa interactivo para transferir datos entre servidores linux, escrito en bash.
 
 Proposito del programa: Poder transferir grandes volumenes de datos hacia servidores remotos, sin la complejidad de la sintaxis, tan solo a travez de un menu interactivo.
@@ -28,8 +34,8 @@ Herramientas necesarias para uso del programa:
 
 Ejecucion del programa:
 
-- Crear una carpeta para el programa y colocar el shellscript (rsync_transfer_data.sh) dentro de ella. 
-- Abrir una terminal en linux y correr: bash /carpeta_programa/rsync_transfer_data.sh
+- Crear una carpeta para el programa y colocar el shellscript (rsync_transfer_data_v2.sh) dentro de ella. 
+- Abrir una terminal en linux y correr: bash /carpeta_programa/rsync_transfer_data_v2.sh
 - NOTA: el programa creara archivos de logs, y carpetas.log ( este ultimo contendra datos que el usuario agrege, que seran excluidos de correrse el modo transferencia con exclusion de datos)
 
 Modo de uso del programa: 
